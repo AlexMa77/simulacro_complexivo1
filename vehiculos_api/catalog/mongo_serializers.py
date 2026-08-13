@@ -29,3 +29,19 @@ class AutoServiceSerializer(serializers.Serializer):
         if not attrs.get("auto_id") and not attrs.get("vehiculo_id"):
             attrs["auto_id"] = 1
         return attrs
+
+
+class FleetLogSerializer(serializers.Serializer):
+    vehicle_id = serializers.IntegerField()
+    action = serializers.ChoiceField(choices=[("CREATED", "CREATED"), ("UPDATED", "UPDATED"), ("MAINTENANCE", "MAINTENANCE"), ("DISABLED", "DISABLED")])
+    note = serializers.CharField(required=False, allow_blank=True)
+    source = serializers.ChoiceField(choices=[("SYSTEM", "SYSTEM"), ("MOBILE", "MOBILE")])
+    created_at = serializers.DateTimeField(required=False)
+
+
+class RentalEventSerializer(serializers.Serializer):
+    rental_id = serializers.IntegerField()
+    event_type = serializers.ChoiceField(choices=[("CREATED", "CREATED"), ("PICKED_UP", "PICKED_UP"), ("RETURNED", "RETURNED"), ("PAID", "PAID"), ("CANCELLED", "CANCELLED")])
+    source = serializers.ChoiceField(choices=[("WEB", "WEB"), ("MOBILE", "MOBILE"), ("SYSTEM", "SYSTEM")])
+    note = serializers.CharField(required=False, allow_blank=True)
+    created_at = serializers.DateTimeField(required=False)

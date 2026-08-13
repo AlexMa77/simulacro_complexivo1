@@ -66,12 +66,23 @@ DATABASES = {
     }
 }
 
+# If no Postgres DB_NAME is provided, fall back to a local SQLite DB for
+# development so `manage.py migrate` still runs without a Postgres password.
+if not DATABASES["default"].get("NAME"):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
 LANGUAGE_CODE = "es-ec"
 TIME_ZONE = "America/Guayaquil"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
