@@ -1,0 +1,310 @@
+{
+  "info": {
+    "_postman_id": "b2d2c3f0-aaaa-bbbb-cccc-autos12345678",
+    "name": "Autos API (Django + Postgres + JWT + Mongo)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8000" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "serviceTypeId", "value": "" },
+    { "key": "autoServiceId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register (Public) - POST /api/auth/register/",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/register/", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register", ""] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"user1\",\n  \"email\": \"user1@mail.com\",\n  \"password\": \"123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login (JWT) - POST /api/auth/login/ (save tokens)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let jsonData = {};",
+                  "try { jsonData = pm.response.json(); } catch (e) {}",
+                  "if (jsonData.access) {",
+                  "  pm.collectionVariables.set('accessToken', jsonData.access);",
+                  "  pm.environment.set('accessToken', jsonData.access);",
+                  "}",
+                  "if (jsonData.refresh) {",
+                  "  pm.collectionVariables.set('refreshToken', jsonData.refresh);",
+                  "  pm.environment.set('refreshToken', jsonData.refresh);",
+                  "}",
+                  "pm.test('Token access recibido', function () {",
+                  "  pm.expect(jsonData.access).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/login/", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login", ""] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Refresh (JWT) - POST /api/auth/refresh/",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let jsonData = {};",
+                  "try { jsonData = pm.response.json(); } catch (e) {}",
+                  "if (jsonData.access) pm.collectionVariables.set('accessToken', jsonData.access);",
+                  "pm.test('Token access refrescado', function () { pm.expect(jsonData.access).to.be.a('string'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/refresh/", "host": ["{{baseUrl}}"], "path": ["api", "auth", "refresh", ""] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refreshToken}}\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Postgres - Marcas",
+      "item": [
+        {
+          "name": "List marcas (Admin token) - GET /api/marcas/",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/marcas/", "host": ["{{baseUrl}}"], "path": ["api", "marcas", ""] }
+          }
+        },
+        {
+          "name": "Create marca (Admin) - POST /api/marcas/",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/marcas/", "host": ["{{baseUrl}}"], "path": ["api", "marcas", ""] },
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Toyota\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Postgres - Autos",
+      "item": [
+        {
+          "name": "List autos (Public) - GET /api/autos/",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/autos/", "host": ["{{baseUrl}}"], "path": ["api", "autos", ""] }
+          }
+        },
+        {
+          "name": "Create auto (Admin) - POST /api/autos/",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/autos/", "host": ["{{baseUrl}}"], "path": ["api", "autos", ""] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marca\": 1,\n  \"modelo\": \"Corolla\",\n  \"anio\": 2020,\n  \"placa\": \"ABC-1234\",\n  \"color\": \"Rojo\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mongo - service_types",
+      "item": [
+        {
+          "name": "List service types (Auth) - GET /api/service-types/",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/service-types/", "host": ["{{baseUrl}}"], "path": ["api", "service-types", ""] }
+          }
+        },
+        {
+          "name": "Create service type (Auth) - POST /api/service-types/",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let jsonData = {};",
+                  "try { jsonData = pm.response.json(); } catch (e) {}",
+                  "if (jsonData.id) pm.collectionVariables.set('serviceTypeId', jsonData.id);",
+                  "pm.test('Se creo service type', function () { pm.expect(jsonData.id).to.be.a('string'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/service-types/", "host": ["{{baseUrl}}"], "path": ["api", "service-types", ""] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cambio de aceite\",\n  \"description\": \"Aceite + filtro\",\n  \"base_price\": 35,\n  \"is_active\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Get service type by id - GET /api/service-types/:id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/service-types/{{serviceTypeId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "service-types", "{{serviceTypeId}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Patch service type - PATCH /api/service-types/:id",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/service-types/{{serviceTypeId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "service-types", "{{serviceTypeId}}", ""]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"is_active\": false\n}" }
+          }
+        },
+        {
+          "name": "Delete service type - DELETE /api/service-types/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/service-types/{{serviceTypeId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "service-types", "{{serviceTypeId}}", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mongo - auto_services",
+      "item": [
+        {
+          "name": "List auto services (Auth) - GET /api/auto-services/",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/auto-services/", "host": ["{{baseUrl}}"], "path": ["api", "auto-services", ""] }
+          }
+        },
+        {
+          "name": "Create auto service (Auth) - POST /api/auto-services/",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let jsonData = {};",
+                  "try { jsonData = pm.response.json(); } catch (e) {}",
+                  "if (jsonData.id) pm.collectionVariables.set('autoServiceId', jsonData.id);",
+                  "pm.test('Se creo auto service', function () { pm.expect(jsonData.id).to.be.a('string'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/auto-services/", "host": ["{{baseUrl}}"], "path": ["api", "auto-services", ""] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"auto_id\": 1,\n  \"service_type_id\": \"{{serviceTypeId}}\",\n  \"kilometers\": 85000,\n  \"cost\": 40,\n  \"notes\": \"Se cambio filtro\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get auto service by id - GET /api/auto-services/:id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/auto-services/{{autoServiceId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auto-services", "{{autoServiceId}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Patch auto service - PATCH /api/auto-services/:id",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auto-services/{{autoServiceId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auto-services", "{{autoServiceId}}", ""]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"cost\": 45,\n  \"notes\": \"Actualizado\"\n}" }
+          }
+        },
+        {
+          "name": "Delete auto service - DELETE /api/auto-services/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/auto-services/{{autoServiceId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auto-services", "{{autoServiceId}}", ""]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
